@@ -1,0 +1,36 @@
+{
+  "max_messages":5,
+  "mode":"list",
+  "autoremove_interval":30,
+  "hud_pos":{"x":0.75,"y":1},
+  "hud_base_offset": {"x":0,"y":-122},
+  "enable_environmental": true,
+  "enable_unknown": false,
+  "environmental_reasons": {
+    "falling":{
+      "name":"Falling",
+      "color":{"r": 255, "g": 255, "b":  255},
+      "method":"deathlist_tombstone.png"
+    },
+    "unknown":{
+      "name":"Something",
+      "color":{"r": 255, "g": 255, "b":  255},
+      "method":"deathlist_tombstone.png"
+    },
+    "drowning":{
+      "color":{"r": 105, "g": 201, "b":  231},
+      "method":"bubble.png",
+      "nodes": {
+        "default:water_flowing" : { "name" : "Water" }
+      }
+    },
+    "node_damage":{
+      "color":{"r": 255, "g": 255, "b":  255},
+      "method":"generate",
+      "nodes": {
+        "default:lava_flowing" : { "name" : "Lava", "color" : {"r": 244, "g": 114, "b": 9}, "method" : "fire_basic_flame.png" },
+        "default:lava_source" : { "color" : {"r": 244, "g": 114, "b": 9}, "method" : "fire_basic_flame.png" }
+      }
+    }
+  }
+}
