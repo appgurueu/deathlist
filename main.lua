@@ -39,6 +39,7 @@ local config=conf.import("deathlist",{
         hud_base_offset=coordinate,
         enable_environmental={type="boolean"},
         enable_unknown={type="boolean"},
+        enable_forbidden_playernames={type="boolean"},
 
         environmental_reasons={
             children={
@@ -64,6 +65,23 @@ local config=conf.import("deathlist",{
 })
 
 table_ext.add_all(getfenv(1), config)
+
+if enable_forbidden_playernames then
+    player_ext.register_forbidden_name(environmental_reasons.falling.name)
+    if enable_unknown then
+        player_ext.register_forbidden_name(environmental_reasons.unknown.name)
+    end
+    for name, node in pairs(minetest.registered_nodes) do
+        if (node.drowning or 0) > 0 then
+            local title=(environmental_reasons.drowning.nodes[name] or {}).name or node.description
+            player_ext.register_forbidden_name(title)
+        end
+        if (node.damage_per_second or 0) > 0 then
+            local title=(environmental_reasons.node_damage.nodes[name] or {}).name or node.description
+            player_ext.register_forbidden_name(title)
+        end
+    end
+end
 
 table_ext.map(environmental_reasons, function(v)
     v.color=mt_ext.get_color_int(v.color)

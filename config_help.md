@@ -19,6 +19,7 @@ Located under `<modpath/gamepath>/deathlist/default_config.json`
   "hud_base_offset": {"x":0,"y":-122},
   "enable_environmental": true,
   "enable_unknown": false,
+  "enable_forbidden_playernames": true,
   "environmental_reasons": {
     "falling":{
       "name":"Falling",
@@ -63,6 +64,8 @@ X- and Y-Offset, numbers in pixels(?).
 Boolean, whether to enable environmental reasons inside kill history.
 #### `enable_unknown`
 Boolean, whether to enable unknown (none of `falling`, `drowning` or `node_damage`) reasons inside kill history.
+#### `enable_forbidden_playernames`
+Boolean, whether to disallow certain playernames in order to reduce confusion(such as "Lava", "Water", "Falling" or "Something")
 #### `environmental_reasons`
 Table/Dictionairy of possible deaths due to environment.
 ##### Basic structure of a kill message
