@@ -98,22 +98,22 @@ table_ext.map(environmental_reasons.node_damage.nodes, function(v)
     return v
 end)
 
-hud_lists={killers={}, items={}, victims={}} -- in order to reduce overhead
+hud_channels ={ killers={}, items={}, victims={}} -- in order to reduce overhead
 
 minetest.register_on_joinplayer(function(player)
-    hud_lists.killers[player:get_player_name()]={}
-    hud_lists.items[player:get_player_name()]={}
-    hud_lists.victims[player:get_player_name()]={}
+    hud_channels.killers[player:get_player_name()]={}
+    hud_channels.items[player:get_player_name()]={}
+    hud_channels.victims[player:get_player_name()]={}
 end)
 
 minetest.register_on_leaveplayer(function(player)
-    hud_lists.killers[player:get_player_name()]=nil
-    hud_lists.items[player:get_player_name()]=nil
-    hud_lists.victims[player:get_player_name()]=nil
+    hud_channels.killers[player:get_player_name()]=nil
+    hud_channels.items[player:get_player_name()]=nil
+    hud_channels.victims[player:get_player_name()]=nil
 end)
 
 function remove_last_kill_msg_from_hud(listname, x_offset)
-    local list=hud_lists[listname]
+    local list= hud_channels[listname]
     for _,player in pairs(minetest.get_connected_players()) do
         local name=player:get_player_name()
         local hud_ids=list[name]
@@ -155,11 +155,11 @@ if autoremove_interval then
 end
 
 function add_kill_msg_to_hud(msg, listname, hud_def, x_offset) -- MAY NOT BE CALLED SIMULTANEOUSLY
-    local _, value=next(hud_lists[listname])
+    local _, value=next(hud_channels[listname])
     if table_ext.is_empty(value) then
         last_message=0
     end
-    local list=hud_lists[listname]
+    local list= hud_channels[listname]
     hud_def.text=msg
     hud_def.offset={x=x_offset+hud_base_offset.x}
     for _,player in pairs(minetest.get_connected_players()) do
