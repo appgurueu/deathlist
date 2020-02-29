@@ -1,1 +1,1 @@
-include_mod("deathlist")
+modlib.mod.init("deathlist")

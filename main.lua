@@ -4,7 +4,7 @@
 --- DateTime: 11.03.19 18:28
 ---
 
-log.create_channel("deathlist") -- Create log channel
+modlib.log.create_channel("deathlist") -- Create modlib.log channel
 
 local coordinate={type="table",
                   children={
@@ -22,7 +22,7 @@ local node_caused={children={
     method={type="string"},
     nodes={type="table", keys={type="string"}, values={type="table", keys={possible_values={name=true, color=true, method=true}}}},
 }}
-local config=conf.import("deathlist",{
+local config=modlib.conf.import("deathlist",{
     type="table",
     children={
         max_messages={type="number", interval={1}},
@@ -64,37 +64,37 @@ local config=conf.import("deathlist",{
     }
 })
 
-table_ext.add_all(getfenv(1), config)
+modlib.table.add_all(getfenv(1), config)
 
 if enable_forbidden_playernames then
-    player_ext.register_forbidden_name(environmental_reasons.falling.name)
+    modlib.player.register_forbidden_name(environmental_reasons.falling.name)
     if enable_unknown then
-        player_ext.register_forbidden_name(environmental_reasons.unknown.name)
+        modlib.player.register_forbidden_name(environmental_reasons.unknown.name)
     end
     for name, node in pairs(minetest.registered_nodes) do
         if (node.drowning or 0) > 0 then
             local title=(environmental_reasons.drowning.nodes[name] or {}).name or node.description
-            player_ext.register_forbidden_name(title)
+            modlib.player.register_forbidden_name(title)
         end
         if (node.damage_per_second or 0) > 0 then
             local title=(environmental_reasons.node_damage.nodes[name] or {}).name or node.description
-            player_ext.register_forbidden_name(title)
+            modlib.player.register_forbidden_name(title)
         end
     end
 end
 
-table_ext.map(environmental_reasons, function(v)
-    v.color=mt_ext.get_color_int(v.color)
+modlib.table.map(environmental_reasons, function(v)
+    v.color=modlib.minetest.get_color_int(v.color)
     return v
 end)
 
-table_ext.map(environmental_reasons.drowning.nodes, function(v)
-    if v.color then v.color=mt_ext.get_color_int(v.color) end
+modlib.table.map(environmental_reasons.drowning.nodes, function(v)
+    if v.color then v.color=modlib.minetest.get_color_int(v.color) end
     return v
 end)
 
-table_ext.map(environmental_reasons.node_damage.nodes, function(v)
-    if v.color then v.color=mt_ext.get_color_int(v.color) end
+modlib.table.map(environmental_reasons.node_damage.nodes, function(v)
+    if v.color then v.color=modlib.minetest.get_color_int(v.color) end
     return v
 end)
 
@@ -135,11 +135,9 @@ function remove_last_kill_msg_from_hud(listname, x_offset)
 end
 
 function remove_last_kill_message()
-    if not threading_ext.request("deathlist.hud_lists",remove_last_kill_message) then return end
     remove_last_kill_msg_from_hud("killers",-20)
     remove_last_kill_msg_from_hud("victims",20)
     remove_last_kill_msg_from_hud("items",0)
-    threading_ext.free("deathlist.hud_lists")
 end
 
 local last_message=0
@@ -154,9 +152,9 @@ if autoremove_interval then
     end)
 end
 
-function add_kill_msg_to_hud(msg, listname, hud_def, x_offset) -- MAY NOT BE CALLED SIMULTANEOUSLY
+function add_kill_msg_to_hud(msg, listname, hud_def, x_offset) -- MAY NOT BE CALLED ASYNC
     local _, value=next(hud_channels[listname])
-    if table_ext.is_empty(value) then
+    if modlib.table.is_empty(value) then
         last_message=0
     end
     local list= hud_channels[listname]
@@ -197,11 +195,9 @@ function add_kill_msg_to_hud(msg, listname, hud_def, x_offset) -- MAY NOT BE CAL
 end
 
 function add_kill_message(killer, tool_image, victim)
-    if not threading_ext.request("deathlist.hud_lists",add_kill_message, killer, tool_image, victim) then return end
     add_kill_msg_to_hud(killer.name,"killers",{hud_elem_type="text",position=hud_pos,scale={x=100,y=100}, number=killer.color or 0xFFFFFF, alignment = {x=-1,y=0}},-20)
     add_kill_msg_to_hud(victim.name,"victims",{hud_elem_type="text",position=hud_pos,number=victim.color or 0xFFFFFF,alignment = {x=1,y=0}},20)
     add_kill_msg_to_hud((tool_image or "deathlist_tombstone.png").."^[resize:16x16", "items",{hud_elem_type="image",position=hud_pos,scale={x=1,y=1}, alignment = {x=0,y=0}},0)
-    threading_ext.free("deathlist.hud_lists")
 end
 
 function add_environmental_kill_message(cause, victim) --Falling & Unknown
@@ -213,7 +209,7 @@ function add_node_kill_message(killing_node, cause, victim) --Drowning & Node Da
     local override=environmental_reasons[cause].nodes[killing_node.name] or {}
     local method=override.method or environmental_reasons[cause].method
     if method=="generate" then
-        method=mt_ext.get_node_inventory_image(killing_node.name)
+        method=modlib.minetest.get_node_inventory_image(killing_node.name)
     end
     add_kill_message({name=override.name or killing_node.description,
                       color=override.color or environmental_reasons[cause].color},
@@ -225,15 +221,15 @@ if enable_environmental then
     minetest.register_on_player_hpchange(
         function(player, hp_change, reason)
             if player:get_hp() > 0 and player:get_hp()+hp_change <= 0 then
-                local victim={name=player:get_player_name(), color=player_ext.get_color_int(player)}
+                local victim={name=player:get_player_name(), color=modlib.player.get_color_int(player)}
                 if reason.type=="fall" then
                     add_environmental_kill_message("falling", victim)
-                    log.write("deathlist","Player "..victim.name.." died due to falling")
+                    modlib.log.write("deathlist","Player "..victim.name.." died due to falling")
                 elseif reason.type=="drown" then
                     local eye_pos=vector.add(player:get_pos(), {x=0, z=0, y=player:get_properties().eye_height})
                     local drowning_node=minetest.registered_nodes[minetest.get_node(eye_pos).name]
                     add_node_kill_message(drowning_node, "drowning", victim)
-                    log.write("deathlist","Player "..victim.name.." died due to drowning in "..drowning_node.name)
+                    modlib.log.write("deathlist","Player "..victim.name.." died due to drowning in "..drowning_node.name)
                 elseif reason.type=="node_damage" then
                     local killing_node_feet=minetest.registered_nodes[minetest.get_node(player:get_pos()).name]
                     local eye_pos=vector.add(player:get_pos(), {x=0, z=0, y=player:get_properties().eye_height})
@@ -243,10 +239,10 @@ if enable_environmental then
                         killing_node=killing_node_head
                     end
                     add_node_kill_message(killing_node, "node_damage", victim)
-                    log.write("deathlist","Player "..victim.name.." died due to node damage of "..killing_node.name)
+                    modlib.log.write("deathlist","Player "..victim.name.." died due to node damage of "..killing_node.name)
                 elseif reason.type~="punch" and enable_unknown then
                     add_environmental_kill_message("unknown", victim)
-                    log.write("deathlist","Player "..victim.name.." died for unknown reasons.")
+                    modlib.log.write("deathlist","Player "..victim.name.." died for unknown reasons.")
                 end
             end
         end
@@ -258,13 +254,13 @@ minetest.register_on_punchplayer(function(player, hitter, time_from_last_punch, 
         local wielded_item_name=hitter:get_wielded_item():get_name()
         local tool
         if minetest.registered_nodes[wielded_item_name] then
-            tool=mt_ext.get_node_inventory_image(wielded_item_name)
+            tool=modlib.minetest.get_node_inventory_image(wielded_item_name)
         else
             tool=(minetest.registered_items[wielded_item_name] or {inventory_image="deathlist_gravestone.png"}).inventory_image
         end
-        local killer={name=hitter:get_player_name(), color=player_ext.get_color_int(hitter)}
-        local victim={name=player:get_player_name(), color=player_ext.get_color_int(player)}
+        local killer={name=hitter:get_player_name(), color=modlib.player.get_color_int(hitter)}
+        local victim={name=player:get_player_name(), color=modlib.player.get_color_int(player)}
         add_kill_message(killer,tool,victim)
-        log.write("deathlist","Player "..killer.name.." killed "..victim.name.." using "..wielded_item_name)
+        modlib.log.write("deathlist","Player "..killer.name.." killed "..victim.name.." using "..wielded_item_name)
     end
 end )
