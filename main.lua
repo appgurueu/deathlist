@@ -1,22 +1,36 @@
 modlib.log.create_channel("deathlist") -- Create modlib.log channel
 
-local coordinate={type="table",
-                  children={
-                      x={type="number"},
-                      y={type="number"}
-                  }}
-local color={type="table",
-                  children={
-                      r={type="number", interval={0,255}},
-                      g={type="number", interval={0,255}},
-                      b={type="number", interval={0,255}}
-                  }}
-local node_caused={children={
-    color=color,
-    method={type="string"},
-    nodes={type="table", keys={type="string"}, values={type="table", keys={possible_values={name=true, color=true, method=true}}}},
-}}
-local config=modlib.conf.import("deathlist",{
+local coordinate={
+    type="table",
+    children={
+        x={type="number"},
+        y={type="number"}
+    }
+}
+local color={
+    type="table",
+    children={
+        r={type="number", interval={0,255}},
+        g={type="number", interval={0,255}},
+        b={type="number", interval={0,255}}
+    }
+}
+
+local node_caused={
+    children={
+        color=color,
+        method={type="string"},
+        nodes={
+            type="table",
+            keys={type="string"},
+            values={
+                type="table",
+                keys={possible_values={name=true, color=true, method=true}}
+            }
+        }
+    }
+}
+local config=modlib.conf.import("deathlist", {
     type="table",
     children={
         max_messages={type="number", interval={1}},
@@ -205,45 +219,73 @@ function add_node_kill_message(killing_node, cause, victim) --Drowning & Node Da
     if method=="generate" then
         method=modlib.minetest.get_node_inventory_image(killing_node.name)
     end
-    add_kill_message({name=override.name or killing_node.description,
-                      color=override.color or environmental_reasons[cause].color},
-            method,
-            victim)
+    add_kill_message({
+        name=override.name or killing_node.description,color=override.color or environmental_reasons[cause].color
+    }, method, victim)
 end
 
-if enable_environmental then
-    minetest.register_on_player_hpchange(
-        function(player, hp_change, reason)
-            if player:get_hp() > 0 and player:get_hp()+hp_change <= 0 then
-                local victim={name=player:get_player_name(), color=modlib.player.get_color_int(player)}
-                if reason.type=="fall" then
-                    add_environmental_kill_message("falling", victim)
-                    modlib.log.write("deathlist","Player "..victim.name.." died due to falling")
-                elseif reason.type=="drown" then
-                    local eye_pos=vector.add(player:get_pos(), {x=0, z=0, y=player:get_properties().eye_height})
-                    local drowning_node=minetest.registered_nodes[minetest.get_node(eye_pos).name]
-                    add_node_kill_message(drowning_node, "drowning", victim)
-                    modlib.log.write("deathlist","Player "..victim.name.." died due to drowning in "..drowning_node.name)
-                elseif reason.type=="node_damage" then
-                    local killing_node_feet=minetest.registered_nodes[minetest.get_node(player:get_pos()).name]
-                    local eye_pos=vector.add(player:get_pos(), {x=0, z=0, y=player:get_properties().eye_height})
-                    local killing_node_head=minetest.registered_nodes[minetest.get_node(eye_pos).name]
-                    local killing_node=killing_node_feet
-                    if (killing_node_head.node_damage or 0) > (killing_node_feet.node_damage or 0) then
-                        killing_node=killing_node_head
-                    end
-                    add_node_kill_message(killing_node, "node_damage", victim)
-                    modlib.log.write("deathlist","Player "..victim.name.." died due to node damage of "..killing_node.name)
-                elseif reason.type ~= "punch" and enable_unknown then
-                    add_environmental_kill_message("unknown", victim)
-                    modlib.log.write("deathlist","Player "..victim.name.." died for unknown reasons.")
+
+function on_player_hpchange(player, hp_change, reason)
+    local type_type = type(reason.type)
+    local type = reason.type
+    if type == "punch" then
+        return -- punches are handled by on_punchplayer
+    end
+    if player:get_hp() > 0 and player:get_hp()+hp_change <= 0 then
+        local victim={name=player:get_player_name(), color=modlib.player.get_color_int(player)}
+        if type == "set_hp" and reason.killer and reason.method then
+            if reason.victim then
+                victim.name = reason.victim.name or victim.name
+                victim.color = reason.victim.color or victim.color
+            end
+            local killer = {
+                name = reason.killer.name,
+                color = reason.killer.color
+            }
+            if not killer.color then
+                local killer_obj = minetest.get_player_by_name(killer.name)
+                if killer_obj then
+                    killer.color = modlib.player.get_color_int(killer_obj)
                 end
             end
+            add_kill_message(killer, reason.method.image, victim)
+            modlib.log.write("deathlist", "Player "..killer.name.." killed "..victim.name.." using "..(reason.method.name or reason.method.image))
+            return
         end
-    )
+        if enable_environmental then
+            if type=="fall" then
+                add_environmental_kill_message("falling", victim)
+                modlib.log.write("deathlist", "Player "..victim.name.." died due to falling")
+                return
+            end
+            if type=="drown" then
+                local eye_pos=vector.add(player:get_pos(), {x=0, z=0, y=player:get_properties().eye_height})
+                local drowning_node=minetest.registered_nodes[minetest.get_node(eye_pos).name]
+                add_node_kill_message(drowning_node, "drowning", victim)
+                modlib.log.write("deathlist", "Player "..victim.name.." died due to drowning in "..drowning_node.name)
+                return
+            end
+            if type=="node_damage" then
+                local killing_node_feet=minetest.registered_nodes[minetest.get_node(player:get_pos()).name]
+                local eye_pos=vector.add(player:get_pos(), {x=0, z=0, y=player:get_properties().eye_height})
+                local killing_node_head=minetest.registered_nodes[minetest.get_node(eye_pos).name]
+                local killing_node=killing_node_feet
+                if (killing_node_head.node_damage or 0) > (killing_node_feet.node_damage or 0) then
+                    killing_node=killing_node_head
+                end
+                add_node_kill_message(killing_node, "node_damage", victim)
+                modlib.log.write("deathlist","Player "..victim.name.." died due to node damage of "..killing_node.name)
+                return
+            end
+        end
+        if enable_unknown then
+            add_environmental_kill_message("unknown", victim)
+            modlib.log.write("deathlist", "Player "..victim.name.." died for unknown reasons.")
+        end
+    end
 end
 
-minetest.register_on_punchplayer(function(player, hitter, time_from_last_punch, tool_capabilities, dir, damage)
+function on_punchplayer(player, hitter, time_from_last_punch, tool_capabilities, dir, damage)
     if player:get_hp() > 0 and player:get_hp()-damage <= 0 and hitter then
         local wielded_item_name=hitter:get_wielded_item():get_name()
         local tool
@@ -255,6 +297,11 @@ minetest.register_on_punchplayer(function(player, hitter, time_from_last_punch, 
         local killer={name=hitter:get_player_name(), color=modlib.player.get_color_int(hitter)}
         local victim={name=player:get_player_name(), color=modlib.player.get_color_int(player)}
         add_kill_message(killer,tool,victim)
-        modlib.log.write("deathlist","Player "..killer.name.." killed "..victim.name.." using "..wielded_item_name)
+        modlib.log.write("deathlist", "Player "..killer.name.." killed "..victim.name.." using "..wielded_item_name)
     end
-end )
+end
+
+minetest.register_on_mods_loaded(function()
+    minetest.register_on_player_hpchange(on_player_hpchange)
+    minetest.register_on_punchplayer(on_punchplayer)
+end)
