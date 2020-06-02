@@ -10,9 +10,9 @@ local coordinate={
 local color={
     type="table",
     children={
-        r={type="number", interval={0,255}},
-        g={type="number", interval={0,255}},
-        b={type="number", interval={0,255}}
+        r={type="number", interval={0,255}, int=true},
+        g={type="number", interval={0,255}, int=true},
+        b={type="number", interval={0,255}, int=true}
     }
 }
 

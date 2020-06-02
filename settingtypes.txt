@@ -1,0 +1,30 @@
+
+deathlist.mode (Deathlist mode) string list
+deathlist.hud_pos.y (Deathlist hud_pos y) float 1
+deathlist.hud_pos.x (Deathlist hud_pos x) float 0.75
+deathlist.enable_unknown (Deathlist enable_unknown) bool true
+deathlist.enable_environmental (Deathlist enable_environmental) bool true
+deathlist.hud_base_offset.y (Deathlist hud_base_offset y) float -122
+deathlist.hud_base_offset.x (Deathlist hud_base_offset x) float 0
+deathlist.environmental_reasons.falling.method (Deathlist environmental_reasons falling method) string deathlist_tombstone.png
+deathlist.environmental_reasons.falling.name (Deathlist environmental_reasons falling name) string Falling
+deathlist.environmental_reasons.falling.color.r (Deathlist environmental_reasons falling color r) int 255
+deathlist.environmental_reasons.falling.color.b (Deathlist environmental_reasons falling color b) int 255
+deathlist.environmental_reasons.falling.color.g (Deathlist environmental_reasons falling color g) int 255
+deathlist.environmental_reasons.drowning.method (Deathlist environmental_reasons drowning method) string bubble.png
+
+deathlist.environmental_reasons.drowning.color.r (Deathlist environmental_reasons drowning color r) int 105
+deathlist.environmental_reasons.drowning.color.b (Deathlist environmental_reasons drowning color b) int 231
+deathlist.environmental_reasons.drowning.color.g (Deathlist environmental_reasons drowning color g) int 201
+deathlist.environmental_reasons.unknown.method (Deathlist environmental_reasons unknown method) string deathlist_tombstone.png
+deathlist.environmental_reasons.unknown.name (Deathlist environmental_reasons unknown name) string Something
+deathlist.environmental_reasons.unknown.color.r (Deathlist environmental_reasons unknown color r) int 255
+deathlist.environmental_reasons.unknown.color.b (Deathlist environmental_reasons unknown color b) int 255
+deathlist.environmental_reasons.unknown.color.g (Deathlist environmental_reasons unknown color g) int 255
+deathlist.environmental_reasons.node_damage.method (Deathlist environmental_reasons node_damage method) string generate
+
+deathlist.environmental_reasons.node_damage.color.r (Deathlist environmental_reasons node_damage color r) int 255
+deathlist.environmental_reasons.node_damage.color.b (Deathlist environmental_reasons node_damage color b) int 255
+deathlist.environmental_reasons.node_damage.color.g (Deathlist environmental_reasons node_damage color g) int 255
+deathlist.max_messages (Deathlist max_messages) float 5
+deathlist.enable_forbidden_playernames (Deathlist enable_forbidden_playernames) bool true
