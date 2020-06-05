@@ -1,4 +1,5 @@
-# Kill History(`deathlist`)
+# Kill History (`deathlist`)
+
 A mod displaying a colored list of recent kills/deaths and the causes(killer, used item).
 
 ## About
