@@ -126,19 +126,21 @@ function remove_last_kill_msg_from_hud(listname, x_offset)
         local name=player:get_player_name()
         local hud_ids=list[name]
         local i=#list[name]
-        if mode=="list" then
-            player:hud_remove(hud_ids[i])
-            hud_ids[i]=nil
-        else
-            player:hud_remove(hud_ids[1]) -- Will be replaced
-            for j=2,i do
-                local new={x=hud_base_offset.x+x_offset,y=hud_base_offset.y-((j-2)*20)}
-                player:hud_change(hud_ids[j],"offset",new)
-                hud_ids[j-1]=hud_ids[j] -- Perform index shift
+        if i > 0 then
+            if mode=="list" then
+                player:hud_remove(hud_ids[i])
+                hud_ids[i]=nil
+            else
+                player:hud_remove(hud_ids[1]) -- Will be replaced
+                for j=2,i do
+                    local new={x=hud_base_offset.x+x_offset,y=hud_base_offset.y-((j-2)*20)}
+                    player:hud_change(hud_ids[j],"offset",new)
+                    hud_ids[j-1]=hud_ids[j] -- Perform index shift
+                end
+                hud_ids[i]=nil
             end
-            hud_ids[i]=nil
+            list[name]=hud_ids
         end
-        list[name]=hud_ids
     end
 end
 
