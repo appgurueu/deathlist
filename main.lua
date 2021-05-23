@@ -86,9 +86,9 @@ minetest.register_on_leaveplayer(function(player) hud_channels[player:get_player
 function remove_last_kill_message()
 	for _, player in pairs(minetest.get_connected_players()) do
 		local name = player:get_player_name()
-		local hud_ids = hud_channels[name]
-		for list, x_offset in pairs{ [hud_ids.killers] = -20, [hud_ids.victims] = 20, [hud_ids.items] = 0 } do
-			local last = #list
+		local hud_channels = hud_channels[name]
+		for hud_ids, x_offset in pairs{ [hud_channels.killers] = -20, [hud_channels.victims] = 20, [hud_channels.items] = 0 } do
+			local last = #hud_ids
 			if last > 0 then
 				if mode == "list" then
 					player:hud_remove(hud_ids[last])
