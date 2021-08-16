@@ -1,3 +1,4 @@
+local colorspec_new = modlib.minetest.colorspec.new
 modlib.log.create_channel"deathlist"
 -- Create modlib.log channel
 local coordinate = {
@@ -73,7 +74,7 @@ end
 for _, table in pairs{ environmental_reasons, environmental_reasons.drowning.nodes, environmental_reasons.node_damage.nodes } do
 	for _, value in pairs(table) do
 		if value.color then
-			value.color = modlib.minetest.get_color_int(value.color)
+			value.color = colorspec_new(value.color):to_number_rgb()
 		end
 	end
 end
