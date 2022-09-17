@@ -4,8 +4,10 @@ local function get_nametag_hud_color(player)
 	return colorspec_new(player:get_nametag_attributes().color):to_number_rgb()
 end
 
-modlib.log.create_channel"deathlist"
--- Create modlib.log channel
+local function log(action)
+	minetest.log("action", "[deathlist] ")
+end
+
 local coordinate = {
 	type = "table",
 	children = { x = { type = "number" }, y = { type = "number" } }
@@ -202,20 +204,20 @@ function on_player_hpchange(player, hp_change, reason)
 				if killer_obj then killer.color = get_nametag_hud_color(killer_obj) end
 			end
 			add_kill_message(killer, reason.method.image, victim)
-			modlib.log.write("deathlist", "Player " .. killer.name .. " killed " .. victim.name .. " using " .. (reason.method.name or reason.method.image))
+			log("Player " .. killer.name .. " killed " .. victim.name .. " using " .. (reason.method.name or reason.method.image))
 			return
 		end
 		if enable_environmental then
 			if type == "fall" then
 				add_environmental_kill_message("falling", victim)
-				modlib.log.write("deathlist", "Player " .. victim.name .. " died due to falling")
+				log("Player " .. victim.name .. " died due to falling")
 				return
 			end
 			if type == "drown" then
 				local eye_pos = vector.add(player:get_pos(), { x = 0, z = 0, y = player:get_properties().eye_height })
 				local drowning_node = minetest.registered_nodes[minetest.get_node(eye_pos).name]
 				add_node_kill_message(drowning_node, "drowning", victim)
-				modlib.log.write("deathlist", "Player " .. victim.name .. " died due to drowning in " .. drowning_node.name)
+				log("Player " .. victim.name .. " died due to drowning in " .. drowning_node.name)
 				return
 			end
 			if type == "node_damage" then
@@ -225,13 +227,13 @@ function on_player_hpchange(player, hp_change, reason)
 				local killing_node = killing_node_feet
 				if (killing_node_head.node_damage or 0) > (killing_node_feet.node_damage or 0) then killing_node = killing_node_head end
 				add_node_kill_message(killing_node, "node_damage", victim)
-				modlib.log.write("deathlist", "Player " .. victim.name .. " died due to node damage of " .. killing_node.name)
+				log("Player " .. victim.name .. " died due to node damage of " .. killing_node.name)
 				return
 			end
 		end
 		if enable_unknown then
 			add_environmental_kill_message("unknown", victim)
-			modlib.log.write("deathlist", "Player " .. victim.name .. " died for unknown reasons.")
+			log("Player " .. victim.name .. " died for unknown reasons.")
 		end
 	end
 end
@@ -248,7 +250,7 @@ function on_punchplayer(player, hitter, _time_from_last_punch, _tool_capabilitie
 		local killer = { name = hitter:get_player_name(), color = get_nametag_hud_color(hitter) }
 		local victim = { name = player:get_player_name(), color = get_nametag_hud_color(player) }
 		add_kill_message(killer, tool, victim)
-		modlib.log.write("deathlist", "Player " .. killer.name .. " killed " .. victim.name .. " using " .. wielded_item_name)
+		log("Player " .. killer.name .. " killed " .. victim.name .. " using " .. wielded_item_name)
 	end
 end
 
