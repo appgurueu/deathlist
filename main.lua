@@ -1,4 +1,9 @@
 local colorspec_new = modlib.minetest.colorspec.new
+
+local function get_nametag_hud_color(player)
+	return colorspec_new(player:get_nametag_attributes().color):to_number_rgb()
+end
+
 modlib.log.create_channel"deathlist"
 -- Create modlib.log channel
 local coordinate = {
@@ -202,7 +207,7 @@ function on_player_hpchange(player, hp_change, reason)
 		-- punches are handled by on_punchplayer
 	end
 	if player:get_hp() > 0 and player:get_hp() + hp_change <= 0 then
-		local victim = { name = player:get_player_name(), color = modlib.player.get_color_int(player) }
+		local victim = { name = player:get_player_name(), color = get_nametag_hud_color(player) }
 		if type == "set_hp" and reason.killer and reason.method then
 			if reason.victim then
 				victim.name = reason.victim.name or victim.name
@@ -211,7 +216,7 @@ function on_player_hpchange(player, hp_change, reason)
 			local killer = { name = reason.killer.name, color = reason.killer.color }
 			if not killer.color then
 				local killer_obj = minetest.get_player_by_name(killer.name)
-				if killer_obj then killer.color = modlib.player.get_color_int(killer_obj) end
+				if killer_obj then killer.color = get_nametag_hud_color(killer_obj) end
 			end
 			add_kill_message(killer, reason.method.image, victim)
 			modlib.log.write("deathlist", "Player " .. killer.name .. " killed " .. victim.name .. " using " .. (reason.method.name or reason.method.image))
@@ -257,8 +262,8 @@ function on_punchplayer(player, hitter, _time_from_last_punch, _tool_capabilitie
 		else
 			tool = (minetest.registered_items[wielded_item_name] or { inventory_image = "deathlist_gravestone.png" }).inventory_image
 		end
-		local killer = { name = hitter:get_player_name(), color = modlib.player.get_color_int(hitter) }
-		local victim = { name = player:get_player_name(), color = modlib.player.get_color_int(player) }
+		local killer = { name = hitter:get_player_name(), color = get_nametag_hud_color(hitter) }
+		local victim = { name = player:get_player_name(), color = get_nametag_hud_color(player) }
 		add_kill_message(killer, tool, victim)
 		modlib.log.write("deathlist", "Player " .. killer.name .. " killed " .. victim.name .. " using " .. wielded_item_name)
 	end
