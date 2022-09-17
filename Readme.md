@@ -56,7 +56,6 @@ player:set_hp(0, {
   "hud_base_offset": {"x":0,"y":-122},
   "enable_environmental": true,
   "enable_unknown": false,
-  "enable_forbidden_playernames": true,
   "environmental_reasons": {
     "falling":{
       "name":"Falling",

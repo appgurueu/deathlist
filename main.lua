@@ -48,7 +48,6 @@ local config = modlib.conf.import("deathlist", {
 		hud_base_offset = coordinate,
 		enable_environmental = { type = "boolean" },
 		enable_unknown = { type = "boolean" },
-		enable_forbidden_playernames = { type = "boolean" },
 		environmental_reasons = {
 			children = {
 				falling = name_color_method,
@@ -60,22 +59,6 @@ local config = modlib.conf.import("deathlist", {
 	}
 })
 modlib.table.add_all(getfenv(1), config)
-if enable_forbidden_playernames then
-	modlib.player.register_forbidden_name(environmental_reasons.falling.name)
-	if enable_unknown then
-		modlib.player.register_forbidden_name(environmental_reasons.unknown.name)
-	end
-	for name, node in pairs(minetest.registered_nodes) do
-		if (node.drowning or 0) > 0 then
-			local title = (environmental_reasons.drowning.nodes[name] or {}).name or node.description
-			modlib.player.register_forbidden_name(title)
-		end
-		if (node.damage_per_second or 0) > 0 then
-			local title = (environmental_reasons.node_damage.nodes[name] or {}).name or node.description
-			modlib.player.register_forbidden_name(title)
-		end
-	end
-end
 for _, table in pairs{ environmental_reasons, environmental_reasons.drowning.nodes, environmental_reasons.node_damage.nodes } do
 	for _, value in pairs(table) do
 		if value.color then

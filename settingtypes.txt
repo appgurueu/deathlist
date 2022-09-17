@@ -27,4 +27,3 @@ deathlist.environmental_reasons.node_damage.color.r (Deathlist environmental_rea
 deathlist.environmental_reasons.node_damage.color.b (Deathlist environmental_reasons node_damage color b) int 255
 deathlist.environmental_reasons.node_damage.color.g (Deathlist environmental_reasons node_damage color g) int 255
 deathlist.max_messages (Deathlist max_messages) float 5
-deathlist.enable_forbidden_playernames (Deathlist enable_forbidden_playernames) bool true
